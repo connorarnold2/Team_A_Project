@@ -1,43 +1,98 @@
-# Windows image file caches
-Thumbs.db
-ehthumbs.db
-
-# Folder config file
-Desktop.ini
-
-# Recycle Bin used on file shares
-$RECYCLE.BIN/
-
-# Windows Installer files
-*.cab
-*.msi
-*.msm
-*.msp
-
-# Windows shortcuts
-*.lnk
-
-# =========================
-# Operating System Files
-# =========================
-
-# OSX
-# =========================
-
-.DS_Store
-.AppleDouble
-.LSOverride
-
-# Thumbnails
-._*
-
-# Files that might appear on external disk
-.Spotlight-V100
-.Trashes
-
-# Directories potentially created on remote AFP share
-.AppleDB
-.AppleDesktop
-Network Trash Folder
-Temporary Items
-.apdisk
+//FUNCTION follow most efficient path to goal
+//and update screen map as robot moves
+void NavigateToGoal()
+{
+  //Store our Robots Current Position
+  int robot_x, robot_y;
+ 
+  //First - Find Goal and Target Locations
+  for(int x=0; x < x_size; x++)
+  {
+    for(int y=0; y < y_size; y++)
+    {
+      if(map[x][y] == 99)
+      {
+        robot_x = x;
+        robot_y = y;
+      }
+    }
+  }
+ 
+  //Found Goal and Target, start deciding our next path
+  int current_x = robot_x;
+  int current_y = robot_y;
+  int current_facing = 0;
+  int next_Direction = 0;
+  int current_low = 99;
+ 
+  while(current_low > 2)
+  {
+    current_low = 99; //Every time, reset to highest number (robot)
+    next_Direction = current_facing;
+    int Next_X = 0;
+    int Next_Y = 0;
+ 
+    //Check Array Bounds West
+    if(current_x > 0)
+      if(map[current_x-1][current_y] < current_low && map[current_x-1][current_y] != 1) //Is current space occupied?
+    {
+      current_low = map[current_x-1][current_y];  //Set next number
+      next_Direction = 3; //Set Next Direction as West
+      Next_X = current_x-1;
+      Next_Y = current_y;
+    }
+ 
+    //Check Array Bounds East
+    if(current_x < (x_size -1))
+      if(map[current_x+1][current_y] < current_low && map[current_x+1][current_y] != 1) //Is current space occupied?
+    {
+      current_low = map[current_x+1][current_y];  //Set next number
+      next_Direction = 1; //Set Next Direction as East
+      Next_X = current_x+1;
+      Next_Y = current_y;
+    }
+ 
+    //Check Array Bounds South
+    if(current_y > 0)
+      if(map[current_x][current_y-1] < current_low && map[current_x][current_y-1] != 1)
+    {
+      current_low = map[current_x][current_y-1];  //Set next number
+      next_Direction = 2; //Set Next Direction as South
+      Next_X = current_x;
+      Next_Y = current_y-1;
+    }
+ 
+    //Check Array Bounds North
+    if(current_y < (y_size - 1))
+      if(map[current_x][current_y+1] < current_low && map[current_x][current_y+1] != 1) //Is current space occupied?
+    {
+      current_low = map[current_x][current_y+1];  //Set next number
+      next_Direction = 0; //Set Next Direction as North
+      Next_X = current_x;
+      Next_Y = current_y+1;
+    }
+ 
+    //Okay - We know the number we're heading for, the direction and the coordinates.
+    current_x = Next_X;
+    current_y = Next_Y;
+    map[current_x][current_y] = '*';
+ 
+    //Track the robot's heading
+    while(current_facing != next_Direction)
+    {
+      if (current_facing > next_Direction)
+      {
+        turnLeft90();
+        current_facing--;
+      }
+      else if(current_facing < next_Direction)
+      {
+        turnRight90();
+        current_facing++;
+      }
+    }
+    moveForward(1);
+    PrintWavefrontMap();
+    wait1Msec(500);
+  }
+}
